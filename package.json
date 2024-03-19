@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/maxufeng/solc-js.git"
+    "url": "https://github.com/caict-4iot-dev/solc-js.git"
   },
   "keywords": [
     "bif",
@@ -41,9 +41,9 @@
   "author": "chriseth",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/maxufeng/solc-js/issues"
+    "url": "https://github.com/caict-4iot-dev/solc-js/issues"
   },
-  "homepage": "https://github.com/maxufeng/solc-js#readme",
+  "homepage": "https://github.com/caict-4iot-dev/solc-js#readme",
   "dependencies": {
     "command-exists": "^1.2.8",
     "commander": "^8.1.0",
