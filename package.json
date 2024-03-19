@@ -1,7 +1,7 @@
 {
-  "name": "solc",
-  "version": "0.8.25",
-  "description": "Solidity compiler",
+  "name": "solc-bif",
+  "version": "0.8.21",
+  "description": "Solidity compiler for bif",
   "main": "index.js",
   "bin": {
     "solcjs": "solc.js"
@@ -11,9 +11,8 @@
     "postbuild": "node build/postbuild.js && cp README.md LICENSE dist/",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --fix --ext .js,.ts .",
-    "updateBinary": "node build/clean.js && ts-node ./downloadCurrentVersion.ts && ts-node ./verifyVersion.ts",
     "prepack": "node build/pack-publish-block.js",
-    "build:tarball": "npm run updateBinary && npm run build && BYPASS_SAFETY_CHECK=true npm pack ./dist",
+    "build:tarball": "npm run build && BYPASS_SAFETY_CHECK=true npm pack ./dist",
     "publish:tarball": "tarball=$(npm run --silent tarballName) && ls \"$tarball\" && BYPASS_SAFETY_CHECK=true npm publish \"$tarball\"",
     "tarballName": "jq --raw-output '.name + \"-\" + .version + \".tgz\"' package.json",
     "copyTestFiles": "cp -r ./test/resources ./dist/test/",
@@ -24,10 +23,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ethereum/solc-js.git"
+    "url": "https://github.com/maxufeng/solc-js.git"
   },
   "keywords": [
-    "ethereum",
+    "bif",
     "solidity",
     "compiler"
   ],
@@ -42,9 +41,9 @@
   "author": "chriseth",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ethereum/solc-js/issues"
+    "url": "https://github.com/maxufeng/solc-js/issues"
   },
-  "homepage": "https://github.com/ethereum/solc-js#readme",
+  "homepage": "https://github.com/maxufeng/solc-js#readme",
   "dependencies": {
     "command-exists": "^1.2.8",
     "commander": "^8.1.0",

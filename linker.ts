@@ -12,7 +12,7 @@ import { LibraryAddresses, LinkReferences } from './common/types';
  * @param fullyQualifiedLibraryName Fully qualified library name.
  */
 function libraryHashPlaceholder (fullyQualifiedLibraryName) {
-  return `$${keccak256(fullyQualifiedLibraryName).slice(0, 34)}$`;
+  return `$${keccak256(fullyQualifiedLibraryName).slice(0, 42)}$`;
 }
 
 /**
@@ -30,8 +30,8 @@ function libraryHashPlaceholder (fullyQualifiedLibraryName) {
  */
 function replacePlaceholder (bytecode, label, address) {
   // truncate to 36 characters
-  const truncatedName = label.slice(0, 36);
-  const libLabel = `__${truncatedName.padEnd(36, '_')}__`;
+  const truncatedName = label.slice(0, 44);
+  const libLabel = `__${truncatedName.padEnd(44, '_')}__`;
 
   while (bytecode.indexOf(libLabel) >= 0) {
     bytecode = bytecode.replace(libLabel, address);
@@ -96,12 +96,12 @@ function linkBytecode (bytecode: string, libraries: LibraryAddresses): string {
   for (const libraryName in librariesComplete) {
     let hexAddress = librariesComplete[libraryName];
 
-    if (!hexAddress.startsWith('0x') || hexAddress.length > 42) {
+    if (!hexAddress.startsWith('0x') || hexAddress.length > 50) {
       throw new Error(`Invalid address specified for ${libraryName}`);
     }
 
     // remove 0x prefix
-    hexAddress = hexAddress.slice(2).padStart(40, '0');
+    hexAddress = hexAddress.slice(2).padStart(48, '0');
 
     bytecode = replacePlaceholder(bytecode, libraryName, hexAddress);
     bytecode = replacePlaceholder(bytecode, libraryHashPlaceholder(libraryName), hexAddress);
@@ -120,7 +120,7 @@ function linkBytecode (bytecode: string, libraries: LibraryAddresses): string {
  *
  * WARNING: The output matches `evm.bytecode.linkReferences` exactly only in
  * case of old-style placeholders created from fully qualified library names
- * of no more than 36 characters, and even then only if the name does not start
+ * of no more than 44 characters, and even then only if the name does not start
  * or end with an underscore. This is different from
  * `evm.bytecode.linkReferences`, which uses fully qualified library names.
  * This is a limitation of the placeholder format - the fully qualified names
@@ -131,7 +131,7 @@ function linkBytecode (bytecode: string, libraries: LibraryAddresses): string {
  *
  * @returns linkReferences A mapping between library labels and their locations
  * in the bytecode. In case of old-style placeholders the label is a fully
- * qualified library name truncated to 36 characters. For new-style placeholders
+ * qualified library name truncated to 44 characters. For new-style placeholders
  * it's the first 34 characters of the hex-encoded hash of the fully qualified
  * library name, with a leading and trailing $ character added. Note that the
  * offsets and lengths refer to the *binary* (not hex-encoded) bytecode, just
@@ -140,14 +140,14 @@ function linkBytecode (bytecode: string, libraries: LibraryAddresses): string {
 function findLinkReferences (bytecode: string): LinkReferences {
   assert(typeof bytecode === 'string');
 
-  // find 40 bytes in the pattern of __...<36 digits>...__
+  // find 48 bytes in the pattern of __...<44 digits>...__
   // e.g. __Lib.sol:L_____________________________
   const linkReferences: LinkReferences = {};
 
   let offset = 0;
 
   while (true) {
-    const found = bytecode.match(/__(.{36})__/);
+    const found = bytecode.match(/__(.{44})__/);
     if (!found) {
       break;
     }
@@ -165,11 +165,11 @@ function findLinkReferences (bytecode: string): LinkReferences {
     // offsets are in bytes in binary representation (and not hex)
     linkReferences[libraryName].push({
       start: (offset + start) / 2,
-      length: 20
+      length: 24
     });
 
-    offset += start + 20;
-    bytecode = bytecode.slice(start + 20);
+    offset += start + 24;
+    bytecode = bytecode.slice(start + 24);
   }
 
   return linkReferences;

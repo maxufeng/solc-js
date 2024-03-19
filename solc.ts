@@ -7,6 +7,7 @@ import * as path from 'path';
 import solc from './index';
 import smtchecker from './smtchecker';
 import smtsolver from './smtsolver';
+import * as bs58 from 'bs58';
 
 // hold on to any exception handlers that existed prior to this script running, we'll be adding them back at the end
 const originalUncaughtExceptionListeners = process.listeners('uncaughtException');
@@ -120,6 +121,83 @@ function reformatJsonIfRequested (inputJson) {
   return (program.prettyJson ? toFormattedJson(JSON.parse(inputJson)) : inputJson);
 }
 
+function processString(str: string): string {
+    console.log('data:' + str);
+   if (str.startsWith('did:bid')) {
+     const decodedArray = bs58.decode(str.substring(10));
+     const hexString = Array.from(decodedArray)
+       .map(byte => byte.toString(16).padStart(2, '0')) // 转换为十六进制并填充到两位  
+       .join('');
+
+     const finalHexString = `0x6566${hexString}`; 
+     console.log('processString:' + finalHexString);      
+     return finalHexString;
+   }
+   return str;
+}
+
+function replaceStringIfMatches(str: string): string {  
+    // 判断字符串是否以"0x"开头并且长度为42  
+    if (str.startsWith('0x') && str.length === 42) {  
+      // 提取原字符串中除去"0x"的部分  
+      const oldStringWithoutPrefix = str.slice(2);  
+      // 按照指定的格式替换字符串  
+      const newString = `0x65660000${oldStringWithoutPrefix}`;
+      console.log('replaceStringIfMatches:' + newString);  
+      return newString;  
+    }  
+    
+    return str;
+}
+
+function process0x42String(data: string): string {
+    try {
+      // 匹配关键字 "0x" 和分隔符 ",;[]" 的字符串
+      const regex = /0x([^,;\[\]]+)/g;
+      let updatedData = data;
+      let match;
+
+      while ((match = regex.exec(data)) !== null) {
+        const originalString = `0x${match[1]}`; // 完整的匹配项
+        const processedString = replaceStringIfMatches(originalString); // 处理字符串
+        updatedData = updatedData.replace(originalString, processedString);
+      }
+
+      return updatedData;
+
+    } catch (error) {
+      console.error('process0x42String error');
+      process.exit(1);
+    }
+ }
+
+function processFileSync(data: string): string {
+    try { 
+      // 匹配关键字 "did:bid:" 和分隔符 ",;[]" 的字符串  
+      const regex = /did:bid:([^,;\[\]]+)/g;
+      let updatedData = data;
+      let match;
+  
+      while ((match = regex.exec(data)) !== null) {
+        const originalString = `did:bid:${match[1]}`; // 完整的匹配项  
+        const processedString = processString(originalString); // 处理字符串    
+        updatedData = updatedData.replace(originalString, processedString);
+      }
+  
+      return updatedData;
+
+    } catch (error) {
+      console.error('processFileSync error');
+      process.exit(1);
+    }
+  }
+
+function dealingString(data: string): string {
+    var dataCheck0x = process0x42String(data);
+    var dataCheckbid = processFileSync(dataCheck0x);
+    return dataCheckbid;
+}
+
 let callbacks;
 if (options.basePath || !options.standardJson) { callbacks = { import: readFileCallback }; }
 
@@ -181,7 +259,7 @@ const sources = {};
 for (let i = 0; i < files.length; i++) {
   try {
     sources[makeSourcePathRelativeIfPossible(files[i])] = {
-      content: fs.readFileSync(files[i]).toString()
+      content: dealingString(fs.readFileSync(files[i]).toString())
     };
   } catch (e) {
     abort('Error reading ' + files[i] + ': ' + e);
@@ -256,3 +334,4 @@ originalUncaughtExceptionListeners.forEach(function (listener) {
 if (hasError) {
   process.exit(1);
 }
+
