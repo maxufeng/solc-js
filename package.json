@@ -1,5 +1,5 @@
 {
-  "name": "@bifproject/solc-bif",
+  "name": "solc-bif",
   "version": "0.8.21",
   "description": "Solidity compiler for bif",
   "main": "index.js",
@@ -38,7 +38,7 @@
     "bindings/*.js",
     "*.js"
   ],
-  "author": "chriseth",
+  "author": "maxufeng",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/caict-4iot-dev/solc-js/issues"
