@@ -1,6 +1,6 @@
 {
-  "name": "solc-bif",
-  "version": "0.8.21",
+  "name": "@bifproject/solc-bif",
+  "version": "0.8.21-2",
   "description": "Solidity compiler for bif",
   "main": "index.js",
   "bin": {
@@ -13,7 +13,7 @@
     "lint:fix": "eslint --fix --ext .js,.ts .",
     "prepack": "node build/pack-publish-block.js",
     "build:tarball": "npm run build && BYPASS_SAFETY_CHECK=true npm pack ./dist",
-    "publish:tarball": "tarball=$(npm run --silent tarballName) && ls \"$tarball\" && BYPASS_SAFETY_CHECK=true npm publish \"$tarball\"",
+    "publish:tarball": "tarball=$(ls *.tgz) && BYPASS_SAFETY_CHECK=true npm publish \"$tarball\"",
     "tarballName": "jq --raw-output '.name + \"-\" + .version + \".tgz\"' package.json",
     "copyTestFiles": "cp -r ./test/resources ./dist/test/",
     "pretest": "npm run lint && npm run build && npm run copyTestFiles",
