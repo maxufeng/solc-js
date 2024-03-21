@@ -52,7 +52,7 @@
     "memorystream": "^0.3.1",
     "semver": "^5.5.0",
     "tmp": "0.0.33",
-    "bs58": "5.0.0"
+    "@bifproject/bs58": "5.0.0"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
