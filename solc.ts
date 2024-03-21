@@ -121,81 +121,65 @@ function reformatJsonIfRequested (inputJson) {
   return (program.prettyJson ? toFormattedJson(JSON.parse(inputJson)) : inputJson);
 }
 
-function processString(str: string): string {
-    console.log('data:' + str);
-   if (str.startsWith('did:bid')) {
-     const decodedArray = bs58.decode(str.substring(10));
-     const hexString = Array.from(decodedArray)
-       .map(byte => byte.toString(16).padStart(2, '0')) // 转换为十六进制并填充到两位  
-       .join('');
-
-     const finalHexString = `0x6566${hexString}`; 
-     console.log('processString:' + finalHexString);      
-     return finalHexString;
-   }
-   return str;
-}
-
-function replaceStringIfMatches(str: string): string {  
-    // 判断字符串是否以"0x"开头并且长度为42  
-    if (str.startsWith('0x') && str.length === 42) {  
-      // 提取原字符串中除去"0x"的部分  
-      const oldStringWithoutPrefix = str.slice(2);  
-      // 按照指定的格式替换字符串  
-      const newString = `0x65660000${oldStringWithoutPrefix}`;
-      console.log('replaceStringIfMatches:' + newString);  
-      return newString;  
-    }  
-    
-    return str;
-}
-
-function process0x42String(data: string): string {
-    try {
-      // 匹配关键字 "0x" 和分隔符 ",;[]" 的字符串
-      const regex = /0x([^,;\[\]]+)/g;
-      let updatedData = data;
-      let match;
-
-      while ((match = regex.exec(data)) !== null) {
-        const originalString = `0x${match[1]}`; // 完整的匹配项
-        const processedString = replaceStringIfMatches(originalString); // 处理字符串
-        updatedData = updatedData.replace(originalString, processedString);
-      }
-
-      return updatedData;
-
-    } catch (error) {
-      console.error('process0x42String error');
-      process.exit(1);
-    }
- }
-
-function processFileSync(data: string): string {
-    try { 
-      // 匹配关键字 "did:bid:" 和分隔符 ",;[]" 的字符串  
-      const regex = /did:bid:([^,;\[\]]+)/g;
-      let updatedData = data;
-      let match;
-  
-      while ((match = regex.exec(data)) !== null) {
-        const originalString = `did:bid:${match[1]}`; // 完整的匹配项  
-        const processedString = processString(originalString); // 处理字符串    
-        updatedData = updatedData.replace(originalString, processedString);
-      }
-  
-      return updatedData;
-
-    } catch (error) {
-      console.error('processFileSync error');
-      process.exit(1);
-    }
+function processString (str: string): string {
+  if (str.startsWith('did:bid:ef')) {
+    const decodedArray = bs58.decode(str.substring(10));
+    const hexString = Array.from(decodedArray).map(byte => byte.toString(16).padStart(2, '0')).join('');
+    const finalHexString = `0x6566${hexString}`;
+    return finalHexString;
   }
+  return str;
+}
 
-function dealingString(data: string): string {
-    var dataCheck0x = process0x42String(data);
-    var dataCheckbid = processFileSync(dataCheck0x);
-    return dataCheckbid;
+function replaceStringIfMatches (str: string): string {
+  if (str.startsWith('0x') && str.length !== 50) {
+    let oldStringWithoutPrefix = str.slice(2);
+    while (oldStringWithoutPrefix.length < 44) {
+      oldStringWithoutPrefix += '0';
+    }
+    const newString = `0x6566${oldStringWithoutPrefix}`;
+    return newString;
+  }
+  return str;
+}
+
+function process0xString (data: string): string {
+  try {
+    const regex = /0x([^,;\]]+)/g;
+    let updatedData = data;
+    let match;
+    while ((match = regex.exec(data)) !== null) {
+      const originalString = `0x${match[1]}`;
+      const processedString = replaceStringIfMatches(originalString);
+      updatedData = updatedData.replace(originalString, processedString);
+    }
+    return updatedData;
+  } catch (error) {
+    console.error('process0xString error');
+    process.exit(1);
+  }
+}
+
+function processFileSync (data: string): string {
+  try {
+    const regex = /did:bid:ef([^,;\]]+)/g;
+    let updatedData = data;
+    let match;
+    while ((match = regex.exec(data)) !== null) {
+      const originalString = `did:bid:ef${match[1]}`;
+      const processedString = processString(originalString);
+      updatedData = updatedData.replace(originalString, processedString);
+    }
+    return updatedData;
+  } catch (error) {
+    console.error('processFileSync error');
+    process.exit(1);
+  }
+}
+
+function dealingString (data: string): string {
+  const tmpdata = process0xString(data);
+  return processFileSync(tmpdata);
 }
 
 let callbacks;
@@ -334,4 +318,3 @@ originalUncaughtExceptionListeners.forEach(function (listener) {
 if (hasError) {
   process.exit(1);
 }
-
